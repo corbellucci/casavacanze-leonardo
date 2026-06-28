@@ -17,7 +17,7 @@
 | 5 | PayPal sandbox (create-order, capture, conferma) | ✅ Fatto (codice pronto, mancano credenziali) |
 | 6 | Email conferma (Nodemailer) | ⬜ Da fare |
 | 7 | Pannello admin (login, dashboard, calendario, blocco date) | ⬜ Da fare |
-| 8 | Deploy Render (render.yaml, PostgreSQL) | ⬜ Da fare |
+| 8 | Deploy Render (render.yaml, PostgreSQL) | 🟡 In corso (repo pronto, manca push + setup Render) |
 
 Legenda: ⬜ Da fare · 🟡 In corso · ✅ Fatto
 
@@ -174,6 +174,16 @@ Note schema DB realizzato:
   - **Degradazione automatica:** senza credenziali reali (placeholder) `config.enabled=false`, gli endpoint pagamento danno 503 e il flusso resta "pending". Verificato.
 - **Nota:** lo script `server-bg.ps1 restart` va ancora in timeout su WSL (blocco noto, da sistemare), ma il processo node detached riparte correttamente. Test API fatti via `powershell Invoke-WebRequest`.
 - **Ripartire da:** Fase 6 — Email conferma (Nodemailer).
+
+### Sessione 9 — 2026-06-29 — FASE 8 avviata (deploy)
+- Strategia concordata: prima online su Render, poi rifinitura pagamenti/booking, **dominio Aruba per ultimo**.
+- Creato **`render.yaml`** (blueprint: web service Node free + PostgreSQL free, region frankfurt, healthCheck `/health`, segreti come `sync:false`).
+- Creato **`src/db/initDb.js`** e integrato in `server.js`: all'avvio esegue `migrate.latest()` e il **seed solo se `rooms` è vuoto** (deploy self-contained, niente shell, prenotazioni mai cancellate).
+- `package.json`: aggiunto `engines` Node `>=20 <23`.
+- `.gitignore` ripulito (esclusi `.env`, `foto/`, `pi-session-*.html`, file `_*`).
+- **Primo commit reale dei sorgenti** (`e314d23`, 54 file). ⚠️ **PUSH NON ancora fatto**: serve autenticazione GitHub interattiva (`git push origin main` dal terminale utente).
+- Verifica locale OK: server parte con initDb, `/health` e `/api/rooms` rispondono.
+- **Ripartire da:** 1) `git push origin main`; 2) creare Blueprint su Render dal repo; 3) impostare variabili segrete; 4) verificare sito online; poi Fase 6 (email)/rifinitura PayPal.
 
 ### Sessione 8 — 2026-06-29 — FIX avvio background
 - **Risolto il blocco/timeout di `server-bg.ps1`** (incl. `restart`): rimossa la redirezione `-RedirectStandardOutput/-RedirectStandardError` di `Start-Process` (teneva vivo il padre → timeout chiamando `powershell.exe` da WSL).

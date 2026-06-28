@@ -1,0 +1,57 @@
+# Blueprint Render per Casa Vacanze Leonardo.
+# Render legge questo file dal repo GitHub e crea automaticamente:
+#  - un database PostgreSQL (free)
+#  - un web service Node (free) collegato al DB
+#
+# Le variabili con "sync: false" NON sono nel repo: vanno inserite a mano nella
+# dashboard di Render (sono segrete: password admin, credenziali PayPal, email).
+# Migrations e seed iniziale vengono eseguiti automaticamente all'avvio
+# (vedi src/db/initDb.js), quindi non serve la shell.
+
+databases:
+  - name: casavacanze-leonardo-db
+    plan: free
+    databaseName: casavacanze
+    user: casavacanze
+    region: frankfurt
+
+services:
+  - type: web
+    name: casavacanze-leonardo
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: casavacanze-leonardo-db
+          property: connectionString
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: PAYPAL_MODE
+        value: sandbox
+      # --- Segreti: da compilare nella dashboard Render ---
+      - key: ADMIN_USERNAME
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_CLIENT_SECRET
+        sync: false
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_PASS
+        sync: false
+      - key: EMAIL_TO
+        sync: false
+      # BASE_URL: l'URL pubblico Render (es. https://casavacanze-leonardo.onrender.com)
+      # da impostare dopo il primo deploy, poi sostituibile col dominio Aruba.
+      - key: BASE_URL
+        sync: false

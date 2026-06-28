@@ -1,0 +1,43 @@
+{
+  "name": "casavacanze-leonardo",
+  "version": "0.1.0",
+  "description": "Sito B&B Casa Vacanze Leonardo - vetrina, prenotazioni e pagamenti PayPal",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "migrate": "knex migrate:latest",
+    "migrate:rollback": "knex migrate:rollback",
+    "migrate:make": "knex migrate:make",
+    "seed": "knex seed:run",
+    "seed:make": "knex seed:make",
+    "db:reset": "knex migrate:rollback --all && knex migrate:latest && knex seed:run"
+  },
+  "keywords": [
+    "bnb",
+    "casa-vacanze",
+    "prenotazioni",
+    "paypal",
+    "express"
+  ],
+  "engines": {
+    "node": ">=20 <23"
+  },
+  "author": "",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "better-sqlite3": "^11.3.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "express-session": "^1.18.0",
+    "knex": "^3.1.0",
+    "nodemailer": "^6.9.15",
+    "pg": "^8.13.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  }
+}

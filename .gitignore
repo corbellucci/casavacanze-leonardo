@@ -1,0 +1,41 @@
+# Dipendenze
+node_modules/
+
+# Variabili ambiente (mai committare!)
+.env
+.env.local
+.env.*.local
+
+# Database locale SQLite
+*.sqlite
+*.sqlite3
+src/db/*.sqlite
+src/db/local.sqlite
+
+# Log
+logs/
+*.log
+npm-debug.log*
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Build / temp
+dist/
+tmp/
+.cache/
+
+# File temporanei di sviluppo / test (server bg, smoke test, dump sessione agent)
+_*.js
+_*.pid
+_*.err
+pi-session-*.html
+
+# Foto originali (sorgenti) - le versioni usate dal sito stanno in public/images
+foto/

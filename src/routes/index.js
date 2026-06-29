@@ -89,6 +89,7 @@ router.get('/availability', async (req, res, next) => {
     }
 
     const unavailableSet = await availability.getUnavailableDates(room.id, from, to);
+    const pendingSet = await availability.getPendingDates(room.id, from, to);
 
     const result = {
       room_id: room.id,
@@ -103,6 +104,8 @@ router.get('/availability', async (req, res, next) => {
       from,
       to,
       unavailable: Array.from(unavailableSet).sort(),
+      // Date con richieste in attesa (non bloccano: selezionabili, ma segnalate).
+      pending: Array.from(pendingSet).sort(),
     };
 
     // Preventivo opzionale.

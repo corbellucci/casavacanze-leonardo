@@ -57,11 +57,15 @@ router.post('/', async (req, res, next) => {
       return res.status(e.status || 400).json({ error: e.message });
     }
 
-    // --- Verifica disponibilità (anti doppia prenotazione) ---
+    // --- Verifica disponibilità ---
+    // Bloccano solo prenotazioni confermate/completate o date bloccate da admin.
     const unavailable = await availability.getUnavailableDates(room.id, check_in, check_out);
     if (!availability.rangeIsFree(check_in, check_out, unavailable)) {
       return res.status(409).json({ error: 'Le date selezionate non sono più disponibili.' });
     }
+    // Le richieste 'pending' non bloccano, ma segnaliamo se ce ne sono già.
+    const pending = await availability.getPendingDates(room.id, check_in, check_out);
+    const pendingConflict = !availability.rangeIsFree(check_in, check_out, pending);
 
     // --- Inserimento ---
     const payload = {
@@ -88,7 +92,7 @@ router.post('/', async (req, res, next) => {
     const [inserted] = await db('bookings').insert(payload).returning('id');
     const id = typeof inserted === 'object' ? inserted.id : inserted;
 
-    res.status(201).json({ id, status: 'pending', ...payload, quote });
+    res.status(201).json({ id, status: 'pending', pending_conflict: pendingConflict, ...payload, quote });
   } catch (err) {
     next(err);
   }

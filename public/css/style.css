@@ -300,6 +300,7 @@ a:hover { color: var(--sea-dark); }
 .dot.free { background: var(--sand); border: 1px solid #d8cdbb; }
 .dot.busy { background: #e9d2cb; border: 1px solid var(--terracotta); }
 .dot.sel { background: var(--sea); }
+.dot.pending { background: var(--sand); border: 1px dashed var(--olive); }
 
 /* calendario */
 .calendar { border: 1px solid var(--sand); border-radius: var(--radius); padding: 1rem; }
@@ -325,6 +326,9 @@ a:hover { color: var(--sea-dark); }
 .cal-cell.free:hover { background: var(--sea); color: var(--white); }
 .cal-cell.past { background: transparent; color: #ccc; cursor: default; }
 .cal-cell.busy { background: #e9d2cb; color: var(--terracotta-dark); text-decoration: line-through; cursor: not-allowed; }
+.cal-cell.tentative { box-shadow: inset 0 0 0 2px var(--olive); }
+.cal-cell.tentative::after { content: '•'; position: absolute; margin-top: 1.4rem; color: var(--olive); font-size: 1.1rem; line-height: 0; }
+.cal-cell { position: relative; }
 .cal-cell.selected { background: var(--sea); color: var(--white); }
 .cal-cell.range-start, .cal-cell.range-end { background: var(--sea-dark); color: var(--white); font-weight: 700; }
 .cal-hint { color: var(--muted); font-size: 0.9rem; margin-top: 0.8rem; }

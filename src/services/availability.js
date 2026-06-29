@@ -65,17 +65,18 @@ function priceForNight(date, seasons, defaultPrice) {
 }
 
 /**
- * Insieme delle date NON disponibili (stringhe 'YYYY-MM-DD') per una room,
- * opzionalmente filtrate in un intervallo [from, to].
- * Considera prenotazioni attive (pending/confirmed) e blocked_dates.
+ * Insieme delle date NON disponibili in modo "definitivo" (stringhe 'YYYY-MM-DD').
+ * Bloccano SOLO le prenotazioni CONFERMATE/COMPLETATE e le date bloccate da admin.
+ * Le richieste 'pending' (non ancora confermate/pagate) NON bloccano: sono
+ * semplici richieste e più ospiti possono inviarle sulle stesse date; sarà il
+ * proprietario a confermarne una (vedi getPendingDates per l'avviso).
  */
 async function getUnavailableDates(roomId, from, to) {
   const unavailable = new Set();
 
-  // Prenotazioni che occupano notti (escludiamo cancelled).
   const bookingsQuery = db('bookings')
     .where({ room_id: roomId })
-    .whereIn('status', ['pending', 'confirmed', 'completed'])
+    .whereIn('status', ['confirmed', 'completed'])
     .select('check_in', 'check_out');
   if (to) bookingsQuery.andWhere('check_in', '<', to);
   if (from) bookingsQuery.andWhere('check_out', '>', from);
@@ -101,6 +102,27 @@ async function getUnavailableDates(roomId, from, to) {
   });
 
   return unavailable;
+}
+
+/**
+ * Insieme delle date con una richiesta in attesa ('pending') non ancora confermata.
+ * Usato per segnalare (non bloccare) potenziali sovrapposizioni di richieste.
+ */
+async function getPendingDates(roomId, from, to) {
+  const pending = new Set();
+  const q = db('bookings')
+    .where({ room_id: roomId, status: 'pending' })
+    .select('check_in', 'check_out');
+  if (to) q.andWhere('check_in', '<', to);
+  if (from) q.andWhere('check_out', '>', from);
+  const rows = await q;
+  rows.forEach((b) => {
+    const start = parseDate(b.check_in);
+    const end = parseDate(b.check_out);
+    if (!start || !end) return;
+    for (let d = start; d < end; d = addDays(d, 1)) pending.add(toISO(d));
+  });
+  return pending;
 }
 
 /**
@@ -176,6 +198,7 @@ module.exports = {
   getRoom,
   getSeasons,
   getUnavailableDates,
+  getPendingDates,
   priceForNight,
   computeQuote,
   rangeIsFree,

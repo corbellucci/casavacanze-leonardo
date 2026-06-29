@@ -175,6 +175,16 @@ Note schema DB realizzato:
 - **Nota:** lo script `server-bg.ps1 restart` va ancora in timeout su WSL (blocco noto, da sistemare), ma il processo node detached riparte correttamente. Test API fatti via `powershell Invoke-WebRequest`.
 - **Ripartire da:** Fase 6 — Email conferma (Nodemailer).
 
+### Sessione 12 — 2026-06-29 — Logica disponibilità: pending non blocca
+- **Decisione (modello "richiesta di prenotazione"):** le richieste `pending` (non pagate/confermate) **non bloccano** più le date. Bloccano solo `confirmed`/`completed` e le date bloccate da admin. Quando PayPal sarà attivo, il pagamento dell'acconto porterà a `confirmed` → da lì blocco reale.
+- `availability.getUnavailableDates`: ora solo confirmed/completed + blocked. Nuova `getPendingDates` per segnalare sovrapposizioni.
+- `GET /api/availability`: aggiunto array `pending` (selezionabili, segnalate).
+- `POST /api/bookings`: 409 solo se overlap con date davvero bloccate; se overlap con altre richieste pending → ok ma risposta con `pending_conflict:true`.
+- Frontend `prenota.js`/`prenota.html`/`style.css`/`i18n.js`: date pending mostrate selezionabili con marcatore + voce di legenda; al termine, se `pending_conflict`, avviso multilingua "controlla l'email, possibile richiesta concorrente".
+- Test E2E locali OK: A pending non blocca → B stesse date passa (pending_conflict true) → conferma A → ora unavailable → C stesse date 409. DB pulito.
+- **NB Email:** la Fase 6 (email di conferma) **non è ancora implementata** → confermare in admin non invia ancora email. Prossimo passo naturale.
+- **Ripartire da:** push (autodeploy). Poi Fase 6 (email, serve App Password Gmail) e/o credenziali PayPal sandbox.
+
 ### Sessione 11 — 2026-06-29 — FASE 7 COMPLETATA (pannello admin) ✅
 - **Backend** (`src/routes/admin.js`): implementati gli endpoint protetti da sessione:
   - `GET /api/admin/bookings?status=&from=&to=` → elenco + conteggi per stato.

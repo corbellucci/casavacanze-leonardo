@@ -23,7 +23,8 @@
   var state = {
     lang: window.DEFAULT_LANG,
     info: null, // risposta /api/availability
-    unavailable: {}, // set come oggetto
+    unavailable: {}, // set come oggetto (bloccate: confermate/admin)
+    pending: {}, // date con richieste in attesa (selezionabili, segnalate)
     view: new Date(), // mese mostrato
     checkIn: null, // 'YYYY-MM-DD'
     checkOut: null,
@@ -98,6 +99,7 @@
   /* ---------- calendario ---------- */
   function isPast(dStr) { return dStr < todayIso(); }
   function isBusy(dStr) { return !!state.unavailable[dStr]; }
+  function isPending(dStr) { return !!state.pending[dStr]; }
 
   function inSelectedRange(dStr) {
     if (!state.checkIn) return false;
@@ -149,6 +151,10 @@
         cell.disabled = true;
       } else {
         cell.classList.add('free');
+        if (isPending(dStr)) {
+          cell.classList.add('tentative');
+          cell.title = t('book.legend.pending');
+        }
         (function (ds) {
           cell.addEventListener('click', function () { onPickDate(ds); });
         })(dStr);
@@ -316,6 +322,7 @@
           return;
         }
         state.bookingId = res.body.id;
+        state.lastPendingConflict = !!res.body.pending_conflict;
         if (state.pay && state.pay.enabled) {
           showPaymentStep(res.body);
         } else {
@@ -337,7 +344,11 @@
     document.getElementById('summaryBox').hidden = true;
     var success = document.getElementById('stepSuccess');
     success.hidden = false;
-    document.getElementById('successMsg').textContent = t(msgKey, { id: id });
+    var msg = t(msgKey, { id: id });
+    if (state.lastPendingConflict) msg += '\n\n⚠️ ' + t('book.success.pendingWarn');
+    var msgEl = document.getElementById('successMsg');
+    msgEl.style.whiteSpace = 'pre-line';
+    msgEl.textContent = msg;
   }
 
   function loadPayPalSdk() {
@@ -431,6 +442,8 @@
       state.info = data;
       state.unavailable = {};
       (data.unavailable || []).forEach(function (d) { state.unavailable[d] = true; });
+      state.pending = {};
+      (data.pending || []).forEach(function (d) { state.pending[d] = true; });
 
       // popola select ospiti
       var sel = document.getElementById('g_guests');

@@ -17,7 +17,7 @@
 | 5 | PayPal sandbox (create-order, capture, conferma) | ✅ Fatto (codice pronto, mancano credenziali) |
 | 6 | Email conferma (Nodemailer) | ⬜ Da fare |
 | 7 | Pannello admin (login, dashboard, calendario, blocco date) | ⬜ Da fare |
-| 8 | Deploy Render (render.yaml, PostgreSQL) | 🟡 In corso (repo pronto, manca push + setup Render) |
+| 8 | Deploy Render (render.yaml, PostgreSQL) | ✅ ONLINE su https://casavacanze-leonardo.onrender.com |
 
 Legenda: ⬜ Da fare · 🟡 In corso · ✅ Fatto
 
@@ -174,6 +174,14 @@ Note schema DB realizzato:
   - **Degradazione automatica:** senza credenziali reali (placeholder) `config.enabled=false`, gli endpoint pagamento danno 503 e il flusso resta "pending". Verificato.
 - **Nota:** lo script `server-bg.ps1 restart` va ancora in timeout su WSL (blocco noto, da sistemare), ma il processo node detached riparte correttamente. Test API fatti via `powershell Invoke-WebRequest`.
 - **Ripartire da:** Fase 6 — Email conferma (Nodemailer).
+
+### Sessione 10 — 2026-06-29 — FASE 8: SITO ONLINE ✅
+- Deploy riuscito su Render: **https://casavacanze-leonardo.onrender.com** (Web Service Node free, region Frankfurt) + **PostgreSQL free** stessa region.
+- Note iter Render: serviva sbloccare l'account (verifica email/metodo pagamento) prima che il deploy partisse; repo collegato via URL pubblico; Health Check Path impostato a `/health`; env var `ADMIN_USERNAME` (non `ADMIN_USER`).
+- `initDb` ha funzionato: migrations + seed automatici su DB vuoto (verificato `/api/rooms`, `/api/availability`, `/health` → env production).
+- **Fix**: `paypal.isEnabled()` ora considera `placeholder`/`your_` come non configurato → con i placeholder su Render il pagamento degrada correttamente (prenotazione "pending").
+- **DA FARE su Render dopo il prossimo push**: impostare env var **`BASE_URL=https://casavacanze-leonardo.onrender.com`**.
+- **Ripartire da:** push del fix paypal (autodeploy) + BASE_URL; poi Fase 6 (email) / credenziali PayPal sandbox reali / Fase 7 (admin). Dominio Aruba per ultimo.
 
 ### Sessione 9 — 2026-06-29 — FASE 8 avviata (deploy)
 - Strategia concordata: prima online su Render, poi rifinitura pagamenti/booking, **dominio Aruba per ultimo**.

@@ -16,13 +16,15 @@ const CLIENT_ID = process.env.PAYPAL_CLIENT_ID || '';
 const CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET || '';
 const MODE = (process.env.PAYPAL_MODE || 'sandbox').toLowerCase();
 
-const PLACEHOLDERS = ['your_sandbox_client_id', 'your_sandbox_client_secret', ''];
+// Valori considerati "non configurati": vuoto o qualsiasi stringa che contenga
+// "placeholder"/"your_" (es. i segnaposto usati in .env.example o su Render).
+function isPlaceholder(value) {
+  const v = (value || '').trim().toLowerCase();
+  return v === '' || v.includes('placeholder') || v.startsWith('your_');
+}
 
 function isEnabled() {
-  return (
-    PLACEHOLDERS.indexOf(CLIENT_ID) === -1 &&
-    PLACEHOLDERS.indexOf(CLIENT_SECRET) === -1
-  );
+  return !isPlaceholder(CLIENT_ID) && !isPlaceholder(CLIENT_SECRET);
 }
 
 function apiBase() {

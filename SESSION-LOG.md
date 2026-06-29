@@ -16,7 +16,7 @@
 | 4 | Prenotazione (API rooms/availability/bookings + calendario) | ✅ Fatto |
 | 5 | PayPal sandbox (create-order, capture, conferma) | ✅ Fatto (codice pronto, mancano credenziali) |
 | 6 | Email conferma (Nodemailer) | ⬜ Da fare |
-| 7 | Pannello admin (login, dashboard, calendario, blocco date) | ⬜ Da fare |
+| 7 | Pannello admin (login, dashboard, calendario, blocco date) | ✅ Fatto |
 | 8 | Deploy Render (render.yaml, PostgreSQL) | ✅ ONLINE su https://casavacanze-leonardo.onrender.com |
 
 Legenda: ⬜ Da fare · 🟡 In corso · ✅ Fatto
@@ -174,6 +174,17 @@ Note schema DB realizzato:
   - **Degradazione automatica:** senza credenziali reali (placeholder) `config.enabled=false`, gli endpoint pagamento danno 503 e il flusso resta "pending". Verificato.
 - **Nota:** lo script `server-bg.ps1 restart` va ancora in timeout su WSL (blocco noto, da sistemare), ma il processo node detached riparte correttamente. Test API fatti via `powershell Invoke-WebRequest`.
 - **Ripartire da:** Fase 6 — Email conferma (Nodemailer).
+
+### Sessione 11 — 2026-06-29 — FASE 7 COMPLETATA (pannello admin) ✅
+- **Backend** (`src/routes/admin.js`): implementati gli endpoint protetti da sessione:
+  - `GET /api/admin/bookings?status=&from=&to=` → elenco + conteggi per stato.
+  - `PUT /api/admin/bookings/:id/status` → cambio stato (pending/confirmed/cancelled/completed, con validazione).
+  - `GET /api/admin/blocked-dates`, `POST /api/admin/blocked-dates` (blocca singolo giorno o intervallo, onConflict ignore), `DELETE /api/admin/blocked-dates/:id`.
+- **Fix robustezza** (`src/config/database.js`): su PostgreSQL le colonne DATE ora tornano come stringa `YYYY-MM-DD` (type parser 1082) → niente slittamenti di giorno per fuso.
+- **Frontend** (`public/admin/index.html` + `public/admin/admin.js`): login, logout, statistiche, **calendario mensile** (prenotato/bloccato/libero), tabella prenotazioni con azioni di stato, gestione date bloccate. `noindex`. Accesso via **`/admin/`**.
+- Test E2E locali OK: login/sessione, 401 senza auth, lista, blocco range (3 giorni), sblocco, creazione prenotazione → conferma, stato non valido → 400. DB locale ripulito.
+- Credenziali admin in produzione: `ADMIN_USERNAME` + `ADMIN_PASSWORD` impostate su Render.
+- **Ripartire da:** push (autodeploy) → testare `/admin/` online. Poi: credenziali PayPal sandbox / Fase 6 email. Dominio Aruba per ultimo.
 
 ### Sessione 10 — 2026-06-29 — FASE 8: SITO ONLINE ✅
 - Deploy riuscito su Render: **https://casavacanze-leonardo.onrender.com** (Web Service Node free, region Frankfurt) + **PostgreSQL free** stessa region.

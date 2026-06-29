@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Admin — Casa Vacanze Leonardo</title>
+    <link rel="icon" type="image/png" href="/images/logo.png" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/style.css" />
+    <style>
+      body { background: var(--sand-2); }
+      .admin-wrap { max-width: 1080px; margin: 0 auto; padding: 1.5rem 1.25rem 4rem; }
+      .admin-top { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+      .admin-top .brand { display: flex; align-items: center; gap: .6rem; font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--sea-dark); }
+      .admin-top .brand img { height: 38px; width: auto; }
+      .card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.4rem; margin-bottom: 1.5rem; }
+      .card h2 { margin: 0 0 1rem; font-size: 1.2rem; color: var(--sea-dark); }
+
+      /* Login */
+      .login-box { max-width: 380px; margin: 8vh auto 0; }
+      .field { margin-bottom: 1rem; }
+      .field label { display: block; font-weight: 600; margin-bottom: .35rem; font-size: .92rem; }
+      .field input { width: 100%; padding: .7rem .85rem; border: 1px solid #d8d2c6; border-radius: 10px; font: inherit; }
+      .field input:focus { outline: none; border-color: var(--sea); }
+      .btn-block { display: block; width: 100%; }
+      .msg { padding: .7rem .9rem; border-radius: 10px; font-size: .9rem; margin-bottom: 1rem; display: none; }
+      .msg.error { background: #fde8e2; color: #9a3412; display: block; }
+      .msg.ok { background: #e6f4ea; color: #1b5e20; display: block; }
+
+      /* Stats */
+      .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: .8rem; }
+      .stat { background: var(--sand); border-radius: 12px; padding: .9rem 1rem; text-align: center; }
+      .stat .n { font-size: 1.8rem; font-weight: 600; color: var(--sea-dark); font-family: 'Playfair Display', serif; }
+      .stat .l { font-size: .8rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+
+      /* Tabella */
+      .toolbar { display: flex; gap: .6rem; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; }
+      select, .toolbar input { padding: .5rem .7rem; border: 1px solid #d8d2c6; border-radius: 8px; font: inherit; }
+      table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+      th, td { text-align: left; padding: .6rem .5rem; border-bottom: 1px solid #eee5d7; vertical-align: top; }
+      th { font-size: .78rem; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); }
+      .table-scroll { overflow-x: auto; }
+      .badge { display: inline-block; padding: .15rem .6rem; border-radius: 999px; font-size: .76rem; font-weight: 600; }
+      .badge.pending { background: #fff3cd; color: #8a6d0b; }
+      .badge.confirmed { background: #d8f0dd; color: #1b5e20; }
+      .badge.cancelled { background: #fde2e2; color: #9a1c1c; }
+      .badge.completed { background: #dce8f5; color: #1f4e79; }
+      .row-actions { display: flex; gap: .3rem; flex-wrap: wrap; }
+      .btn-sm { padding: .35rem .7rem; font-size: .8rem; border-radius: 8px; }
+      .btn-ghost { background: transparent; border: 1px solid #d8d2c6; color: var(--ink); }
+      .btn-ghost:hover { background: var(--sand); }
+      .btn-danger { background: #c0392b; color: #fff; }
+      .muted { color: var(--muted); font-size: .85rem; }
+      .empty { text-align: center; padding: 2rem; color: var(--muted); }
+
+      /* Calendario */
+      .cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: .8rem; }
+      .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+      .cal-dow { text-align: center; font-size: .72rem; color: var(--muted); text-transform: uppercase; padding: .2rem 0; }
+      .cal-cell { aspect-ratio: 1 / 1; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: .85rem; background: var(--sand-2); border: 1px solid #eee5d7; }
+      .cal-cell.empty { background: transparent; border: none; }
+      .cal-cell.booked { background: var(--terracotta); color: #fff; font-weight: 600; }
+      .cal-cell.blocked { background: #9b9b9b; color: #fff; }
+      .cal-cell.past { opacity: .45; }
+      .legend { display: flex; gap: 1rem; margin-top: .8rem; font-size: .82rem; flex-wrap: wrap; }
+      .legend span { display: inline-flex; align-items: center; gap: .35rem; }
+      .dot { width: 14px; height: 14px; border-radius: 4px; display: inline-block; }
+      .hidden { display: none !important; }
+    </style>
+  </head>
+  <body>
+    <!-- ===== LOGIN ===== -->
+    <section id="loginView" class="admin-wrap hidden">
+      <div class="card login-box">
+        <div class="brand" style="justify-content:center;margin-bottom:1.2rem;">
+          <img src="/images/logo.png" alt="" /> <span style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--sea-dark);">Area Riservata</span>
+        </div>
+        <div id="loginMsg" class="msg"></div>
+        <form id="loginForm">
+          <div class="field">
+            <label for="username">Username</label>
+            <input id="username" name="username" autocomplete="username" required />
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" autocomplete="current-password" required />
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Accedi</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ===== DASHBOARD ===== -->
+    <section id="dashView" class="admin-wrap hidden">
+      <div class="admin-top">
+        <div class="brand"><img src="/images/logo.png" alt="" /> Pannello Amministrazione</div>
+        <div>
+          <span class="muted" id="whoami"></span>
+          <button id="logoutBtn" class="btn btn-ghost btn-sm">Esci</button>
+        </div>
+      </div>
+
+      <div id="globalMsg" class="msg"></div>
+
+      <!-- Statistiche -->
+      <div class="card">
+        <h2>Riepilogo prenotazioni</h2>
+        <div class="stats" id="stats"></div>
+      </div>
+
+      <!-- Calendario -->
+      <div class="card">
+        <h2>Calendario disponibilità</h2>
+        <div class="cal-head">
+          <button id="calPrev" class="btn btn-ghost btn-sm">‹</button>
+          <strong id="calTitle"></strong>
+          <button id="calNext" class="btn btn-ghost btn-sm">›</button>
+        </div>
+        <div class="cal-grid" id="calDow"></div>
+        <div class="cal-grid" id="calGrid"></div>
+        <div class="legend">
+          <span><i class="dot" style="background:var(--terracotta)"></i> Prenotato</span>
+          <span><i class="dot" style="background:#9b9b9b"></i> Bloccato</span>
+          <span><i class="dot" style="background:var(--sand-2);border:1px solid #eee5d7"></i> Libero</span>
+        </div>
+      </div>
+
+      <!-- Date bloccate -->
+      <div class="card">
+        <h2>Blocca date (manutenzione / uso personale / altri canali)</h2>
+        <div class="toolbar">
+          <label class="muted">Dal <input type="date" id="blkFrom" /></label>
+          <label class="muted">Al <input type="date" id="blkTo" /></label>
+          <input type="text" id="blkReason" placeholder="Motivo (opzionale)" style="flex:1;min-width:140px;" />
+          <button id="blkAdd" class="btn btn-primary btn-sm">Blocca</button>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Data</th><th>Motivo</th><th></th></tr></thead>
+            <tbody id="blockedBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Prenotazioni -->
+      <div class="card">
+        <h2>Prenotazioni</h2>
+        <div class="toolbar">
+          <select id="statusFilter">
+            <option value="">Tutti gli stati</option>
+            <option value="pending">In attesa</option>
+            <option value="confirmed">Confermate</option>
+            <option value="completed">Completate</option>
+            <option value="cancelled">Annullate</option>
+          </select>
+          <button id="reloadBtn" class="btn btn-ghost btn-sm">Aggiorna</button>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th><th>Ospite</th><th>Contatti</th><th>Periodo</th>
+                <th>Notti</th><th>Totale</th><th>Acconto</th><th>Stato</th><th>Azioni</th>
+              </tr>
+            </thead>
+            <tbody id="bookingsBody"></tbody>
+          </table>
+        </div>
+        <div id="bookingsEmpty" class="empty hidden">Nessuna prenotazione.</div>
+      </div>
+    </section>
+
+    <script src="/admin/admin.js"></script>
+  </body>
+</html>

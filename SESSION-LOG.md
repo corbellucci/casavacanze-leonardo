@@ -23,10 +23,19 @@ Legenda: ⬜ Da fare · 🟡 In corso · ✅ Fatto
 
 ---
 
-## Prossimo passo
-**Fase 6 — Email di conferma (Nodemailer):** inviare email all'ospite e al proprietario quando una prenotazione viene confermata (capture PayPal OK) e/o creata (pending). Richiede App Password Gmail (vedi Domande aperte #3). Configurare SMTP da `EMAIL_USER`/`EMAIL_PASS`/`EMAIL_TO`. Template multilingua (IT/EN/DE/FR) usando `bookings.lang`.
+## 📍 DOVE SIAMO (aggiornato Sessione 12 — 2026-06-29)
+**Sito ONLINE e funzionante:** https://casavacanze-leonardo.onrender.com (Render free + PostgreSQL free, region Frankfurt). Admin: https://casavacanze-leonardo.onrender.com/admin/ (login `admin` + `ADMIN_PASSWORD` impostata su Render). Auto-deploy attivo: ogni `git push` aggiorna il sito.
 
-**Per attivare la Fase 5 (PayPal):** inserire in `.env` `PAYPAL_CLIENT_ID` e `PAYPAL_CLIENT_SECRET` sandbox reali (ora placeholder). Senza credenziali il sito funziona comunque: la prenotazione resta in stato `pending` (richiesta), senza pagamento online (degradazione automatica via `/api/payment/config`).
+**Fasi completate:** 0–5 (vetrina+prenotazione+PayPal codice), **7 admin**, **8 deploy**. Logica disponibilità aggiornata: le richieste `pending` NON bloccano (solo confermate/bloccate).
+
+**Repo git:** tutto committato e pushato (ultimo commit `f0af943`). Working tree pulito.
+
+## Prossimo passo (da fare nella prossima sessione)
+**Opzione A — Fase 6 Email di conferma (Nodemailer):** inviare email a ospite e proprietario su prenotazione creata (pending) e confermata. **SERVE: App Password Gmail del proprietario** (vedi Domande aperte #3). Config via env `EMAIL_USER`/`EMAIL_PASS`/`EMAIL_TO` (già su Render con placeholder, da sostituire). Template multilingua (IT/EN/DE/FR) usando `bookings.lang`. Hook: in `POST /api/bookings` (richiesta) e in `PUT /api/admin/bookings/:id/status` quando → confirmed, e nel capture PayPal.
+
+**Opzione B — PayPal sandbox reale:** generare `PAYPAL_CLIENT_ID`/`PAYPAL_CLIENT_SECRET` sandbox su developer.paypal.com e metterli su Render al posto dei placeholder. Codice già pronto (degradazione automatica via `/api/payment/config`).
+
+**Per ultimo — Dominio Aruba:** puntare il dominio sul servizio Render (custom domain + DNS).
 
 Nota ambiente: Node è disponibile come eseguibile Windows (v24). In WSL eseguire npm/node via `cmd.exe /c "..."`. better-sqlite3 è compilato per Windows.
 
